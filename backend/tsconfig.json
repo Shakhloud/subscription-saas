@@ -8,8 +8,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   },
-  "include": ["src"],
+  "include": ["src", "src/PrismaClient.ts"],
   "exclude": ["node_modules", "dist"]
 }

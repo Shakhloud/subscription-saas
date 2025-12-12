@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum SubscriptionStatus {
+  free
+  trial
+  active
+  expired
+}
+
+
+enum StripeSubscriptionState {
+  active
+  canceled
+  incomplete
+  past_due
+}
+
+model User {
+  id String @id @default(uuid())
+  email String @unique
+  passwordHash String
+  role Role @default(user)
+  subscriptionStatus SubscriptionStatus @default(free)
+  stripeCustomerId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  subscriptions Subscription[]
+  refreshTokens RefreshToken[]
+  auditLogs AuditLog[]
+}
+
+model Subscription {
+  id String @id @default(uuid())
+  userId String
+  stripeSubscriptionId String
+  stripePriceId String
+  stripeSessionId String?
+  status StripeSubscriptionState
+  currentPeriodEnd DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Content {
+  id String @id @default(uuid())
+  title String
+  body String
+  isPremium Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id String @id @default(uuid())
+  userId String
+  token String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+  userId String?
+  action String
+  meta Json?
+  createdAt DateTime @default(now())
+  user User? @relation(fields: [userId], references: [id])
+}
